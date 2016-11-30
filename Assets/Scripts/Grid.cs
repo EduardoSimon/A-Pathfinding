@@ -6,7 +6,7 @@ using System.Collections.Generic;
 public class Grid : MonoBehaviour {
 
     #region FIELDS
-    public bool onlyDisplayPathGizmos;
+    public bool onlyDisplayGridGizmos;
     public Transform player;
     public Vector2 gridWorldSize;
     public float nodeRadius;
@@ -18,7 +18,7 @@ public class Grid : MonoBehaviour {
 
     #endregion
 
-    private void Start()
+     void Awake()
     {
         nodeDiameter = nodeRadius * 2;
         gridSizeX = Mathf.RoundToInt(gridWorldSize.x / nodeDiameter);
@@ -82,42 +82,22 @@ public class Grid : MonoBehaviour {
         return grid[x, y];
     }
 
-    public List<Node> path;
-
     #region GIZMOS
 
     private void OnDrawGizmos()
     {
         Gizmos.DrawWireCube(transform.position, new Vector3 (gridWorldSize.x, 0.1f, gridWorldSize.y));
 
-        if(onlyDisplayPathGizmos)
+        if (grid != null && onlyDisplayGridGizmos)
         {
-            if(path != null)
+            Node playerNode = NodeFromWorldPoint(player.position);
+            foreach (Node nodo in grid)
             {
-                foreach (Node n in path)
-                {
-                    Gizmos.color = Color.black;
-                    Gizmos.DrawCube(n.worldPosition, Vector3.one * (nodeDiameter - 0.1f));
-                }
+                Gizmos.color = (nodo.walkable) ? Color.white : Color.red;
+                if (playerNode == nodo) Gizmos.color = Color.cyan;
+                Gizmos.DrawCube(nodo.worldPosition, Vector3.one * (nodeDiameter - 0.1f));
             }
         }
-        else
-        {
-            if (grid != null)
-            {
-                Node playerNode = NodeFromWorldPoint(player.position);
-                foreach (Node nodo in grid)
-                {
-                    Gizmos.color = (nodo.walkable) ? Color.white : Color.red;
-                    if (path != null)
-                        if (path.Contains(nodo))
-                            Gizmos.color = Color.black;
-                    if (playerNode == nodo) Gizmos.color = Color.cyan;
-                    Gizmos.DrawCube(nodo.worldPosition, Vector3.one * (nodeDiameter - 0.1f));
-                }
-            }
-        }
-        
     }
     #endregion
 
