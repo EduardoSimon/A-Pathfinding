@@ -6,6 +6,7 @@ using System.Collections.Generic;
 public class Grid : MonoBehaviour {
 
     #region FIELDS
+    public bool onlyDisplayPathGizmos;
     public Transform player;
     public Vector2 gridWorldSize;
     public float nodeRadius;
@@ -25,6 +26,10 @@ public class Grid : MonoBehaviour {
         CreateGrid();
     }
 
+    public int MaxSize
+    {
+        get { return gridSizeX * gridSizeY; }
+    }
     void CreateGrid()
     {
         grid = new Node[gridSizeX, gridSizeY];
@@ -85,19 +90,34 @@ public class Grid : MonoBehaviour {
     {
         Gizmos.DrawWireCube(transform.position, new Vector3 (gridWorldSize.x, 0.1f, gridWorldSize.y));
 
-        if (grid != null)
+        if(onlyDisplayPathGizmos)
         {
-            Node playerNode = NodeFromWorldPoint(player.position);
-            foreach (Node nodo in grid)
+            if(path != null)
             {
-                Gizmos.color = (nodo.walkable) ? Color.white : Color.red;
-                if (path != null)
-                    if (path.Contains(nodo))
-                        Gizmos.color = Color.black;
-                if (playerNode == nodo) Gizmos.color = Color.cyan;
-                Gizmos.DrawCube(nodo.worldPosition, Vector3.one * (nodeDiameter - 0.1f));
+                foreach (Node n in path)
+                {
+                    Gizmos.color = Color.black;
+                    Gizmos.DrawCube(n.worldPosition, Vector3.one * (nodeDiameter - 0.1f));
+                }
             }
         }
+        else
+        {
+            if (grid != null)
+            {
+                Node playerNode = NodeFromWorldPoint(player.position);
+                foreach (Node nodo in grid)
+                {
+                    Gizmos.color = (nodo.walkable) ? Color.white : Color.red;
+                    if (path != null)
+                        if (path.Contains(nodo))
+                            Gizmos.color = Color.black;
+                    if (playerNode == nodo) Gizmos.color = Color.cyan;
+                    Gizmos.DrawCube(nodo.worldPosition, Vector3.one * (nodeDiameter - 0.1f));
+                }
+            }
+        }
+        
     }
     #endregion
 

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 public class Pathfinding : MonoBehaviour
 {
@@ -19,7 +20,8 @@ public class Pathfinding : MonoBehaviour
 
     private void Update()
     {
-        FindPath(source.position, target.position);
+        if(Input.GetButtonDown("Jump"))
+            FindPath(source.position, target.position);
     }
     #endregion
 
@@ -27,30 +29,25 @@ public class Pathfinding : MonoBehaviour
 
     void FindPath(Vector3 startPos, Vector3 targetPos)
     {
+        Stopwatch sw = new Stopwatch();
+        sw.Start();
         Node startNode = grid.NodeFromWorldPoint(startPos);
         Node targetNode = grid.NodeFromWorldPoint(targetPos);
 
-        List<Node> openSet = new List<Node>();
+        Heap<Node> openSet = new Heap<Node>(grid.MaxSize);
         HashSet<Node> closedSet = new HashSet<Node>();
-
         openSet.Add(startNode);
 
         while(openSet.Count > 0)
         {
-            Node current = openSet[0];
-
-            for (int i = 1; i < openSet.Count; i++)
-            {
-                if (openSet[i].fCost < current.fCost || openSet[i].fCost == current.fCost && openSet[i].hCost < current.hCost)
-                    current = openSet[i];
-            }
-
-            openSet.Remove(current);
+            Node current = openSet.Remove();
             closedSet.Add(current);
 
             //if we found the target Node exit from the loop
             if (current == targetNode)
             {
+                sw.Stop();
+                print("Path found: " + sw.ElapsedMilliseconds + "ms. ");
                 RetracePath(startNode, targetNode);
                 return;
             }
@@ -68,7 +65,13 @@ public class Pathfinding : MonoBehaviour
                     neighbour.parent = current;
 
                     if (!openSet.Contains(neighbour))
+                    {
                         openSet.Add(neighbour);
+                    }
+                    else
+                    {
+                        openSet.UpdateItem(neighbour);
+                    }
                 }
             }
 
